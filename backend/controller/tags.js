@@ -6,12 +6,13 @@ const createTag = (req, res) => {
 
   const query = "INSERT INTO tags(name) VALUES(?)";
 
-  db.query(query, [name], (err) => {
+  db.query(query, [name], (err,result) => {
     if (err) {
       return res.status(400).json({ message: "Tag already exists" });
     }
     res.json({
-      message: "Tag created"
+      message: "Tag created",
+      tagId: result.insertId
     });
   });
 };
