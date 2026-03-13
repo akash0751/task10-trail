@@ -31,7 +31,7 @@ function AssignTag(){
 
       <input
       className="form-control mb-2"
-      placeholder="Item ID (use 1,2 for testing)"
+      placeholder="Item ID (use 1,2 for testing!!)"
       value={itemId}
       onChange={(e)=>setItemId(e.target.value)}
       />
