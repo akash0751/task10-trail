@@ -19,17 +19,35 @@ const createTag = (req, res) => {
 
 const assignTag = (req, res) => {
 
-  const { itemId, tagId } = req.body;
+const { itemId, tagId } = req.body;
 
-  const query = "INSERT INTO item_tags(item_id, tag_id) VALUES(?,?)";
+const checkQuery =
+"SELECT * FROM item_tags WHERE item_id=? AND tag_id=?";
 
-  db.query(query, [itemId, tagId], (err) => {
+db.query(checkQuery,[itemId,tagId],(err,result)=>{
 
-    if (err) {
-      return res.status(400).json({ message: "Tag already assigned" });
-    }
-    res.json({ message: "Tag assigned to item" });
-  });
+if(result.length > 0){
+return res.json({
+message:"Tag already exists for this item"
+});
+}
+
+const insertQuery =
+"INSERT INTO item_tags(item_id,tag_id) VALUES(?,?)";
+
+db.query(insertQuery,[itemId,tagId],(err)=>{
+
+if(err){
+return res.status(500).json(err);
+}
+
+res.json({
+message:"Tag assigned successfully"
+});
+
+});
+
+});
 
 };
 
@@ -44,7 +62,9 @@ const removeTag = (req, res) => {
     if (err) {
       return res.status(500).json(err);
     }
+
     res.json({ message: "Tag removed" });
+
   });
 
 };
@@ -73,5 +93,69 @@ const getItemsByTag = (req, res) => {
 
 };
 
+const getItems = (req, res) => {
 
-module.exports = {createTag, assignTag, removeTag, getItemsByTag};
+  const query = "SELECT * FROM items";
+
+  db.query(query, (err, result) => {
+
+    if (err) {
+      return res.status(500).json(err);
+    }
+
+    res.json(result);
+
+  });
+
+};
+
+const getItemsWithTags = (req, res) => {
+
+const query = `
+SELECT 
+items.id,
+items.title,
+GROUP_CONCAT(tags.name) AS tags
+FROM items
+LEFT JOIN item_tags ON items.id = item_tags.item_id
+LEFT JOIN tags ON tags.id = item_tags.tag_id
+GROUP BY items.id
+`;
+
+db.query(query,(err,result)=>{
+
+if(err){
+return res.status(500).json(err);
+}
+
+res.json(result);
+
+});
+
+};
+
+const getTags = (req,res)=>{
+
+const query = "SELECT * FROM tags";
+
+db.query(query,(err,result)=>{
+
+if(err){
+return res.status(500).json(err);
+}
+
+res.json(result);
+
+});
+
+};
+
+module.exports = {
+  createTag,
+  assignTag,
+  removeTag,
+  getItemsByTag,
+  getItems,
+  getItemsWithTags,
+  getTags
+};
